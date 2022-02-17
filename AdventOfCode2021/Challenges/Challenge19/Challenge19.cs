@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode2021.Challenges.Challenge19;
+﻿using System.Runtime.CompilerServices;
+
+namespace AdventOfCode2021.Challenges.Challenge19;
 
 public class Challenge19 : IAocChallenge
 {
@@ -6,63 +8,82 @@ public class Challenge19 : IAocChallenge
     {
         var scanners = ParseInput(inputText).ToList();
 
-        var fixedScanners = scanners.Take(1).ToList();
+        var fixedScanners = scanners.Take(1)
+            .Select(x => new FixedScanner(new Position(0, 0, 0), x)).ToList();
         var relativeScanners = scanners.Skip(1).ToList();
 
         while (relativeScanners.Count > 0)
         {
-            foreach (var fixedScanner in fixedScanners)
-            {
-                foreach (var relativeScanner in relativeScanners)
-                {
-                    foreach (var adjustedScanner in GetScannerPermutations(relativeScanner))
-                    {
-                        // TODO this does not (yet) work
-
-                        var distances = fixedScanner.Beacons
-                            .SelectMany(b1 => adjustedScanner.Beacons
-                                .Select(b2 => Distance(b1, b2)))
-                            .ToList();
-
-                        var dict = distances
-                            .GroupBy(x => x)
-                            .ToDictionary(x => x.Key, x => x.Count());
-
-                        var isOverlapping = distances
-                            .GroupBy(x => x)
-                            .Any(x => x.Count() >= 66);
-
-                        Console.WriteLine(distances.GroupBy(x => x).Max(x => x.Count()));
-
-                        if (distances.GroupBy(x => x).Max(x => x.Count()) > 2)
-                        {
-                            // TODO check
-                        }
-
-                        var test = distances.Average();
-
-                        if (isOverlapping)
-                        {
-                            Console.WriteLine("working");
-                            relativeScanners.Remove(relativeScanner);
-                            // TODO transform scanner here
-                            var transformedScanner = adjustedScanner;
-                            fixedScanners.Add(transformedScanner);
-                        }
-                    }
-                }
-            }
-
-            // TODO remove after test
-            break;
+            AdjustOneScanner(fixedScanners, relativeScanners);
         }
 
-        return -1;
+        var distinctBeacons = fixedScanners
+            .SelectMany(x => x.Scanner.Beacons)
+            .Distinct()
+            .ToList();
+
+        return distinctBeacons.Count;
     }
 
     public object RunTask2(string[] inputText)
     {
-        return -1;
+        var scanners = ParseInput(inputText).ToList();
+
+        var fixedScanners = scanners.Take(1)
+            .Select(x => new FixedScanner(new Position(0, 0, 0), x)).ToList();
+        var relativeScanners = scanners.Skip(1).ToList();
+
+        while (relativeScanners.Count > 0)
+        {
+            AdjustOneScanner(fixedScanners, relativeScanners);
+        }
+
+        var scannerPositions = fixedScanners.Select(x => x.Position).ToList();
+
+        var manhattanDistances = scannerPositions
+            .SelectMany(x => scannerPositions.Select(y => ManhattanDistance(x, y)))
+            .ToList();
+
+        return manhattanDistances.Max();
+    }
+
+    private static void AdjustOneScanner(ICollection<FixedScanner> fixedScanners, ICollection<Scanner> relativeScanners)
+    {
+        foreach (var fixedScanner in fixedScanners)
+        {
+            foreach (var relativeScanner in relativeScanners)
+            {
+                foreach (var adjustedScanner in GetScannerPermutations(relativeScanner))
+                {
+                    var distances = fixedScanner.Scanner.Beacons
+                        .SelectMany(b1 => adjustedScanner.Beacons
+                            .Select(b2 => new DistanceRecord(b1, b2, Distance(b1, b2))))
+                        .ToList();
+
+                    var maxOverlappingGrouping = distances
+                        .GroupBy(x => x.Distance)
+                        .MaxBy(x => x.Count())!;
+
+                    var overlappingCount = maxOverlappingGrouping.Count();
+
+                    if (overlappingCount < 12) continue;
+                    
+                    relativeScanners.Remove(relativeScanner);
+
+                    var (position1, position2, _) = maxOverlappingGrouping.First();
+                    var positionOffset = position1 - position2;
+
+                    var newFixedScanner = new FixedScanner(positionOffset, 
+                        new Scanner(adjustedScanner.Beacons.Select(x => x + positionOffset).ToList()));
+
+                    fixedScanners.Add(newFixedScanner);
+
+                    return;
+                }
+            }
+        }
+
+        throw new Exception("No overlapping scanners found");
     }
 
     private static IEnumerable<Scanner> GetScannerPermutations(Scanner scanner)
@@ -146,8 +167,34 @@ public class Challenge19 : IAocChallenge
 
         yield return new Scanner(currentPositions);
     }
+
+    private static int ManhattanDistance(Position pos1, Position pos2)
+    {
+        var (x1, y1, z1) = pos1;
+        var (x2, y2, z2) = pos2;
+        return Math.Abs(x1 - x2) + Math.Abs(y1 - y2) + Math.Abs(z1 - z2);
+    }
+
 }
+
+internal record DistanceRecord(Position Position1, Position Position2, double Distance);
+
+internal record FixedScanner(Position Position, Scanner Scanner);
 
 internal record Scanner(IList<Position> Beacons);
 
-internal record Position(int X, int Y, int Z);
+internal record Position(int X, int Y, int Z)
+{
+    public static Position operator -(Position pos1, Position pos2)
+    {
+        var (x1, y1, z1) = pos1;
+        var (x2, y2, z2) = pos2;
+        return new Position(x1 - x2, y1 - y2, z1 - z2);
+    }
+    public static Position operator +(Position pos1, Position pos2)
+    {
+        var (x1, y1, z1) = pos1;
+        var (x2, y2, z2) = pos2;
+        return new Position(x1 + x2, y1 + y2, z1 + z2);
+    }
+}
