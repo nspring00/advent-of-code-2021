@@ -72,14 +72,24 @@ internal class Challenge13 : IAocChallenge
         if (axis == 'x')
         {
             return field
-                .Select(p => p.X <= foldValue ? p : p with { X = 2 * foldValue - p.X })
+                .Select(p => p.X <= foldValue
+                    ? p
+                    : p with
+                    {
+                        X = 2 * foldValue - p.X
+                    })
                 .Where(p => p.X != foldValue)
                 .Distinct()
                 .ToList();
         }
 
         return field
-            .Select(p => p.Y <= foldValue ? p : p with { Y = 2 * foldValue - p.Y })
+            .Select(p => p.Y <= foldValue
+                ? p
+                : p with
+                {
+                    Y = 2 * foldValue - p.Y
+                })
             .Where(p => p.Y != foldValue)
             .Distinct()
             .ToList();

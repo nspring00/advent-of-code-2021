@@ -75,7 +75,7 @@ public class Challenge16 : IAocChallenge
             offset = 0L;
             while (subPacketLength - offset > 0)
             {
-                var (packet, length) = ParsePacket(data[(22 + (int) offset)..]);
+                var (packet, length) = ParsePacket(data[(22 + (int)offset)..]);
                 op.Packets.Add(packet);
                 offset += length;
             }
@@ -87,7 +87,7 @@ public class Challenge16 : IAocChallenge
         offset = 18;
         for (var i = 0; i < subPacketCount; i++)
         {
-            var (packet, length) = ParsePacket(data[(int) offset..]);
+            var (packet, length) = ParsePacket(data[(int)offset..]);
             op.Packets.Add(packet);
             offset += length;
         }
@@ -104,22 +104,54 @@ public class Challenge16 : IAocChallenge
     {
         var dict = new Dictionary<char, string>
         {
-            { '0', "0000" },
-            { '1', "0001" },
-            { '2', "0010" },
-            { '3', "0011" },
-            { '4', "0100" },
-            { '5', "0101" },
-            { '6', "0110" },
-            { '7', "0111" },
-            { '8', "1000" },
-            { '9', "1001" },
-            { 'A', "1010" },
-            { 'B', "1011" },
-            { 'C', "1100" },
-            { 'D', "1101" },
-            { 'E', "1110" },
-            { 'F', "1111" }
+            {
+                '0', "0000"
+            },
+            {
+                '1', "0001"
+            },
+            {
+                '2', "0010"
+            },
+            {
+                '3', "0011"
+            },
+            {
+                '4', "0100"
+            },
+            {
+                '5', "0101"
+            },
+            {
+                '6', "0110"
+            },
+            {
+                '7', "0111"
+            },
+            {
+                '8', "1000"
+            },
+            {
+                '9', "1001"
+            },
+            {
+                'A', "1010"
+            },
+            {
+                'B', "1011"
+            },
+            {
+                'C', "1100"
+            },
+            {
+                'D', "1101"
+            },
+            {
+                'E', "1110"
+            },
+            {
+                'F', "1111"
+            }
         };
 
         var str = string.Join("", inputText.First().Select(x => dict[x]));
@@ -150,6 +182,7 @@ internal record Literal(int Version, int TypeId, long Value) : Packet(Version, T
 internal record Operator(int Version, int TypeId) : Packet(Version, TypeId)
 {
     public IList<Packet> Packets { get; } = new List<Packet>();
+
     public override int VersionSum()
     {
         return Packets.Sum(x => x.VersionSum()) + Version;

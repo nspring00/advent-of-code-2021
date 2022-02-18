@@ -38,7 +38,10 @@ internal class Challenge10 : IAocChallenge
     {
         var stack = new Stack<char>();
 
-        var opening = new[] { '(', '[', '<', '{' };
+        var opening = new[]
+        {
+            '(', '[', '<', '{'
+        };
 
         foreach (var c in line.ToCharArray())
         {
@@ -61,7 +64,10 @@ internal class Challenge10 : IAocChallenge
     {
         var stack = new Stack<char>();
 
-        var opening = new[] { '(', '[', '<', '{' };
+        var opening = new[]
+        {
+            '(', '[', '<', '{'
+        };
 
         foreach (var c in line.ToCharArray())
         {

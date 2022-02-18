@@ -17,7 +17,10 @@ internal class Challenge12 : IAocChallenge
     private static int Task1(IEnumerable<Cave> caves)
     {
         var start = caves.Single(x => x.Name.Equals("start"));
-        var result = Dfs1(start, new List<Cave> { start });
+        var result = Dfs1(start, new List<Cave>
+        {
+            start
+        });
         //Console.WriteLine(string.Join('\n', result));
 
         return result.Count;
@@ -26,7 +29,10 @@ internal class Challenge12 : IAocChallenge
     private static int Task2(IEnumerable<Cave> caves)
     {
         var start = caves.Single(x => x.Name.Equals("start"));
-        var result = Dfs2(start, new List<Cave> { start });
+        var result = Dfs2(start, new List<Cave>
+        {
+            start
+        });
         //Console.WriteLine(string.Join('\n', result));
 
         return result.Count;
@@ -50,7 +56,10 @@ internal class Challenge12 : IAocChallenge
                 continue;
             }
 
-            var visitedCopy = new List<Cave>(visited) { adjacentCave };
+            var visitedCopy = new List<Cave>(visited)
+            {
+                adjacentCave
+            };
 
             var nextCaves = Dfs1(adjacentCave, visitedCopy);
             results.AddRange(nextCaves
@@ -83,7 +92,10 @@ internal class Challenge12 : IAocChallenge
                 localDoubleVisitedCave = adjacentCave;
             }
 
-            var visitedCopy = new List<Cave>(visited) { adjacentCave };
+            var visitedCopy = new List<Cave>(visited)
+            {
+                adjacentCave
+            };
 
             var nextCaves = Dfs2(adjacentCave, visitedCopy, localDoubleVisitedCave);
             if (nextCaves.Count == 0) continue;

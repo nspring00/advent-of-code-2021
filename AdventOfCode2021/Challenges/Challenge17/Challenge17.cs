@@ -63,6 +63,7 @@ public class Challenge17 : IAocChallenge
             {
                 xVel--;
             }
+
             yVel--;
         }
 

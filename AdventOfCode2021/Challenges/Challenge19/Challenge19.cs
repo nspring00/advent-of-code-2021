@@ -67,13 +67,13 @@ public class Challenge19 : IAocChallenge
                     var overlappingCount = maxOverlappingGrouping.Count();
 
                     if (overlappingCount < 12) continue;
-                    
+
                     relativeScanners.Remove(relativeScanner);
 
                     var (position1, position2, _) = maxOverlappingGrouping.First();
                     var positionOffset = position1 - position2;
 
-                    var newFixedScanner = new FixedScanner(positionOffset, 
+                    var newFixedScanner = new FixedScanner(positionOffset,
                         new Scanner(adjustedScanner.Beacons.Select(x => x + positionOffset).ToList()));
 
                     fixedScanners.Add(newFixedScanner);
@@ -174,7 +174,6 @@ public class Challenge19 : IAocChallenge
         var (x2, y2, z2) = pos2;
         return Math.Abs(x1 - x2) + Math.Abs(y1 - y2) + Math.Abs(z1 - z2);
     }
-
 }
 
 internal record DistanceRecord(Position Position1, Position Position2, double Distance);
@@ -191,6 +190,7 @@ internal record Position(int X, int Y, int Z)
         var (x2, y2, z2) = pos2;
         return new Position(x1 - x2, y1 - y2, z1 - z2);
     }
+
     public static Position operator +(Position pos1, Position pos2)
     {
         var (x1, y1, z1) = pos1;

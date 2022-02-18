@@ -55,7 +55,9 @@ internal class Challenge15 : IAocChallenge
 
         var bestValues = new Dictionary<(int X, int Y), int>(field.Count * field[0].Length)
         {
-            { (0, 0), 0 }
+            {
+                (0, 0), 0
+            }
         };
 
         while (queue.TryDequeue(out var point, out var value))

@@ -72,30 +72,59 @@ internal class Challenge8 : IAocChallenge
         var seg5 = seg235.Single(x => x.Contains(segA) && x.Contains(segBd[0]) && x.Contains(segBd[1]));
 
         var segF = seg5.Intersect(seg1).Single();
-        var segC = seg1.Except(new[] { segF }).Single();
+        var segC = seg1.Except(new[]
+        {
+            segF
+        }).Single();
 
-        var seg23 = seg235.Except(new[] { seg5 }).ToList();
+        var seg23 = seg235.Except(new[]
+        {
+            seg5
+        }).ToList();
         var seg2 = seg23.Single(x => !x.Contains(segF));
         var seg3 = seg23.Single(x => x.Contains(segF));
 
         var seg6 = seg690.Single(x => !x.Contains(segC));
         var segE = seg8.Except(seg3).Except(seg4).Single();
-        var seg90 = seg690.Except(new[] { seg6 }).ToList();
+        var seg90 = seg690.Except(new[]
+        {
+            seg6
+        }).ToList();
         var seg9 = seg90.Single(x => !x.Contains(segE));
         var seg0 = seg90.Single(x => x.Contains(segE));
 
         Dictionary<IList<Signal>, int> returnDictionary = new(10)
         {
-            { seg0, 0 },
-            { seg1, 1 },
-            { seg2, 2 },
-            { seg3, 3 },
-            { seg4, 4 },
-            { seg5, 5 },
-            { seg6, 6 },
-            { seg7, 7 },
-            { seg8, 8 },
-            { seg9, 9 }
+            {
+                seg0, 0
+            },
+            {
+                seg1, 1
+            },
+            {
+                seg2, 2
+            },
+            {
+                seg3, 3
+            },
+            {
+                seg4, 4
+            },
+            {
+                seg5, 5
+            },
+            {
+                seg6, 6
+            },
+            {
+                seg7, 7
+            },
+            {
+                seg8, 8
+            },
+            {
+                seg9, 9
+            }
         };
 
         return returnDictionary;

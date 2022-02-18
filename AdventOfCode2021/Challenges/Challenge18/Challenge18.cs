@@ -19,7 +19,7 @@ public class Challenge18 : IAocChallenge
             .SelectMany(first => input
                 .Where(second => first != second)
                 .Select(second => (first, second)))
-                .ToList();
+            .ToList();
 
         var values = combinedInputs
             .Select(value => AddNodes(value.first, value.second))
@@ -189,14 +189,13 @@ internal class PairNode : Node
 
         (ret, addLeft, addRight) = Right.ExplodeIfNecessary(depth + 1);
         if (!ret) return (false, -1, -1);
-        
+
         if (addLeft != -1)
         {
             Left.AddToRightmost(addLeft);
         }
 
         return (true, -1, addRight);
-
     }
 
     public override void AddToLeftmost(int value)

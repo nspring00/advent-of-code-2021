@@ -32,7 +32,10 @@ public class Challenge14 : IAocChallenge
         var last = baseLine.Last();
         var values = mappings.Keys
             .ToDictionary(x => x, x =>
-                Regex.Matches(baseLine, new string(new[] { x.Item1, x.Item2 })).LongCount())
+                Regex.Matches(baseLine, new string(new[]
+                {
+                    x.Item1, x.Item2
+                })).LongCount())
             .Where(x => x.Value != 0)
             .ToDictionary(x => x.Key, x => x.Value);
 
