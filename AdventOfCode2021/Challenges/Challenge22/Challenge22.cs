@@ -36,32 +36,48 @@ internal class Challenge22 : IAocChallenge
 
     public object RunTask2(string[] inputText)
     {
-        var input = ParseInput(inputText);
+        var instructions = ParseInput(inputText);
 
-        var field = new HashSet<Point>();
-
-        var c = 1;
-        foreach (var instruction in input)
+        var cubes = new Dictionary<(int, int, int, int, int, int), int>();
+        foreach (var (val, x0, x1, y0, y1, z0, z1) in instructions)
         {
-            var points = instruction.GetPoints2();
-            if (instruction.TurnOn)
+            var update = new Dictionary<(int, int, int, int, int, int), int>();
+
+            foreach (var ((ox0, ox1, oy0, oy1, oz0, oz1), otherVal) in cubes)
             {
-                foreach (var point in points)
-                {
-                    field.Add(point);
-                }
+                var nx0 = Math.Max(x0, ox0);
+                var nx1 = Math.Min(x1, ox1);
+                var ny0 = Math.Max(y0, oy0);
+                var ny1 = Math.Min(y1, oy1);
+                var nz0 = Math.Max(z0, oz0);
+                var nz1 = Math.Min(z1, oz1);
+                var key = (nx0, nx1, ny0, ny1, nz0, nz1);
+
+                if (nx0 > nx1 || ny0 > ny1 || nz0 > nz1) continue;
+
+                update.TryAdd(key, 0);
+                update[key] -= otherVal;
             }
-            else
+
+            if (val)
             {
-                foreach (var point in points)
-                {
-                    field.Remove(point);
-                }
+                update.TryAdd((x0, x1, y0, y1, z0, z1), 0);
+                update[(x0, x1, y0, y1, z0, z1)] += 1;
             }
-            Console.WriteLine(c++);
+
+            // Update cubes with update
+            foreach (var (key, delta) in update)
+            {
+                cubes.TryAdd(key, 0);
+                cubes[key] += delta;
+            }
         }
 
-        return field.Count;
+        return cubes.Select(x =>
+        {
+            var ((x0, x1, y0, y1, z0, z1), val) = x;
+            return (long)(x1 - x0 + 1) * (y1 - y0 + 1) * (z1 - z0 + 1) * val;
+        }).Sum();
     }
 
     private static IList<Instruction> ParseInput(IEnumerable<string> inputText)
@@ -136,7 +152,7 @@ internal record Instruction(bool TurnOn, int FromX, int ToX, int FromY, int ToY,
 
         return points;
     }
-    
+
     public IList<Point> GetPoints2()
     {
         var points = new List<Point>();
