@@ -26,19 +26,7 @@ internal class Challenge23 : IAocChallenge
 
     public object RunTask1(string[] inputText)
     {
-        var start = ParseInput(inputText);
-        var isGoalCheck = (Tile[] stateToCheck) =>
-        {
-            if (stateToCheck[11] != Tile.A) return false;
-            if (stateToCheck[12] != Tile.B) return false;
-            if (stateToCheck[13] != Tile.C) return false;
-            if (stateToCheck[14] != Tile.D) return false;
-            if (stateToCheck[15] != Tile.A) return false;
-            if (stateToCheck[16] != Tile.B) return false;
-            if (stateToCheck[17] != Tile.C) return false;
-            return stateToCheck[18] == Tile.D;
-        };
-        const int nrPerType = 2;
+        var start = ParseInput1(inputText);
 
         var testResult = RoomMoves(new[]
         {
@@ -70,9 +58,155 @@ internal class Challenge23 : IAocChallenge
             -1
         }.AsSpan().SequenceEqual(testResult));
 
+        return FindShortestPath(start, IsGoalCheck, 2);
+
+        bool IsGoalCheck(Tile[] stateToCheck)
+        {
+            if (stateToCheck[11] != Tile.A) return false;
+            if (stateToCheck[12] != Tile.B) return false;
+            if (stateToCheck[13] != Tile.C) return false;
+            if (stateToCheck[14] != Tile.D) return false;
+            if (stateToCheck[15] != Tile.A) return false;
+            if (stateToCheck[16] != Tile.B) return false;
+            if (stateToCheck[17] != Tile.C) return false;
+            return stateToCheck[18] == Tile.D;
+        }
+    }
+
+    private static void PrintState(Tile[] state, int nrPerType, int indent = 0)
+    {
+        var prefix = new string(' ', indent);
+        Console.Write(prefix);
+        Console.WriteLine("#############");
+        Console.Write(prefix);
+        Console.Write("#");
+        for (var i = 0; i < CorridorSize; i++)
+        {
+            Console.Write(state[i] switch
+            {
+                Tile.Empty => '.',
+                Tile.A => 'A',
+                Tile.B => 'B',
+                Tile.C => 'C',
+                Tile.D => 'D',
+                _ => throw new UnreachableException()
+            });
+        }
+
+        Console.WriteLine("#");
+
+        for (var j = 0; j < nrPerType; j++)
+        {
+            Console.Write(prefix);
+            Console.Write(j == 0 ? "###" : "  #");
+            for (var i = 0; i < 4; i++)
+            {
+                Console.Write(state[CorridorSize + 4 * j + i] switch
+                {
+                    Tile.Empty => '.',
+                    Tile.A => 'A',
+                    Tile.B => 'B',
+                    Tile.C => 'C',
+                    Tile.D => 'D',
+                    _ => throw new UnreachableException()
+                });
+                Console.Write("#");
+            }
+
+            if (j == 0)
+            {
+                Console.Write("##");
+            }
+
+            Console.WriteLine();
+        }
+
+        Console.Write(prefix);
+        Console.WriteLine("  #########");
+    }
+
+    private static int CostOfType(Tile t)
+    {
+        return t switch
+        {
+            Tile.A => 1,
+            Tile.B => 10,
+            Tile.C => 100,
+            Tile.D => 1000,
+            _ => throw new UnreachableException()
+        };
+    }
+
+    private static int[] RoomMoves(IReadOnlyList<Tile> state, int nrPerType)
+    {
+        int[] rooms =
+        {
+            -1,
+            -1,
+            -1,
+            -1
+        };
+
+        for (var i = 0; i < 4; i++)
+        {
+            var targetTile = (Tile)i;
+            var isOkay = true;
+            for (var j = 0; j < nrPerType; j++)
+            {
+                var tile = state[CorridorSize + j * 4 + i];
+                if (tile != Tile.Empty && tile != targetTile)
+                {
+                    isOkay = false;
+                    break;
+                }
+
+                if (tile == Tile.Empty)
+                {
+                    rooms[i] = j;
+                }
+            }
+
+            if (!isOkay)
+            {
+                rooms[i] = -1;
+            }
+        }
+
+        return rooms;
+    }
+
+    public object RunTask2(string[] inputText)
+    {
+        var start = ParseInput2(inputText);
+
+        return FindShortestPath(start, IsGoalCheck, 4);
+
+        bool IsGoalCheck(Tile[] stateToCheck)
+        {
+            if (stateToCheck[11] != Tile.A) return false;
+            if (stateToCheck[12] != Tile.B) return false;
+            if (stateToCheck[13] != Tile.C) return false;
+            if (stateToCheck[14] != Tile.D) return false;
+            if (stateToCheck[15] != Tile.A) return false;
+            if (stateToCheck[16] != Tile.B) return false;
+            if (stateToCheck[17] != Tile.C) return false;
+            if (stateToCheck[18] != Tile.D) return false;
+            if (stateToCheck[19] != Tile.A) return false;
+            if (stateToCheck[20] != Tile.B) return false;
+            if (stateToCheck[21] != Tile.C) return false;
+            if (stateToCheck[22] != Tile.D) return false;
+            if (stateToCheck[23] != Tile.A) return false;
+            if (stateToCheck[24] != Tile.B) return false;
+            if (stateToCheck[25] != Tile.C) return false;
+            return stateToCheck[26] == Tile.D;
+        }
+    }
+
+    private static int FindShortestPath(Tile[] initialState, Func<Tile[], bool> goalCheck, int nrPerType)
+    {
         var visited = new HashSet<ulong>();
         var queue = new PriorityQueue<(Tile[], List<(Tile[], int)>), int>();
-        queue.Enqueue((start, new List<(Tile[], int)>()), 0);
+        queue.Enqueue((initialState, new List<(Tile[], int)>()), 0);
 
         while (queue.TryDequeue(out var item, out var cost))
         {
@@ -80,16 +214,16 @@ internal class Challenge23 : IAocChallenge
             // Console.WriteLine("---------------------------------------------");
             // PrintState(state, nrPerType);
 
-            if (isGoalCheck(state))
+            if (goalCheck(state))
             {
-                Console.WriteLine("Found solution!");
-                foreach (var (s, c) in prevStates)
-                {
-                    Console.WriteLine(c);
-                    PrintState(s, nrPerType);
-                }
-                Console.WriteLine(cost);
-                PrintState(state, nrPerType);
+                // Console.WriteLine("Found solution!");
+                // foreach (var (s, c) in prevStates)
+                // {
+                //     Console.WriteLine(c);
+                //     PrintState(s, nrPerType);
+                // }
+                // Console.WriteLine(cost);
+                // PrintState(state, nrPerType);
 
                 return cost;
             }
@@ -207,110 +341,6 @@ internal class Challenge23 : IAocChallenge
         return -1;
     }
 
-    private static void PrintState(Tile[] state, int nrPerType, int indent = 0)
-    {
-        var prefix = new string(' ', indent);
-        Console.Write(prefix);
-        Console.WriteLine("#############");
-        Console.Write(prefix);
-        Console.Write("#");
-        for (var i = 0; i < CorridorSize; i++)
-        {
-            Console.Write(state[i] switch
-            {
-                Tile.Empty => '.',
-                Tile.A => 'A',
-                Tile.B => 'B',
-                Tile.C => 'C',
-                Tile.D => 'D',
-                _ => throw new UnreachableException()
-            });
-        }
-        Console.WriteLine("#");
-
-        for (var j = 0; j < nrPerType; j++)
-        {
-            Console.Write(prefix);
-            Console.Write(j == 0 ? "###" : "  #");
-            for (var i = 0; i < 4; i++)
-            {
-                Console.Write(state[CorridorSize + 4 * j + i] switch
-                {
-                    Tile.Empty => '.',
-                    Tile.A => 'A',
-                    Tile.B => 'B',
-                    Tile.C => 'C',
-                    Tile.D => 'D',
-                    _ => throw new UnreachableException()
-                });
-                Console.Write("#");
-            }
-
-            if (j == 0)
-            {
-                Console.Write("##");
-            }
-            Console.WriteLine();
-        }
-        Console.Write(prefix);
-        Console.WriteLine("  #########");
-    }
-
-    private static int CostOfType(Tile t)
-    {
-        return t switch
-        {
-            Tile.A => 1,
-            Tile.B => 10,
-            Tile.C => 100,
-            Tile.D => 1000,
-            _ => throw new UnreachableException()
-        };
-    }
-
-    private static int[] RoomMoves(IReadOnlyList<Tile> state, int nrPerType)
-    {
-        int[] rooms =
-        {
-            -1,
-            -1,
-            -1,
-            -1
-        };
-
-        for (var i = 0; i < 4; i++)
-        {
-            var targetTile = (Tile)i;
-            var isOkay = true;
-            for (var j = 0; j < nrPerType; j++)
-            {
-                var tile = state[CorridorSize + j * 4 + i];
-                if (tile != Tile.Empty && tile != targetTile)
-                {
-                    isOkay = false;
-                    break;
-                }
-
-                if (tile == Tile.Empty)
-                {
-                    rooms[i] = j;
-                }
-            }
-
-            if (!isOkay)
-            {
-                rooms[i] = -1;
-            }
-        }
-
-        return rooms;
-    }
-
-    public object RunTask2(string[] inputText)
-    {
-        return 0;
-    }
-
     private static ulong SerializeState(Tile[] state)
     {
         ulong result = 0;
@@ -322,7 +352,7 @@ internal class Challenge23 : IAocChallenge
         return result;
     }
 
-    private static Tile[] ParseInput(string[] inputText)
+    private static Tile[] ParseInput1(string[] inputText)
     {
         var state = new Tile[FieldSize];
         int i;
@@ -346,6 +376,56 @@ internal class Challenge23 : IAocChallenge
                 };
                 i++;
             }
+        }
+
+        return state;
+    }
+
+    private static Tile[] ParseInput2(string[] inputText)
+    {
+        var state = new Tile[FieldSize];
+        int i;
+        for (i = 0; i < FieldSize; i++)
+        {
+            state[i] = Tile.Empty;
+        }
+
+        i = CorridorSize;
+        var line = inputText[2];
+        foreach (var c in line.Where(c => c is 'A' or 'B' or 'C' or 'D'))
+        {
+            state[i] = c switch
+            {
+                'A' => Tile.A,
+                'B' => Tile.B,
+                'C' => Tile.C,
+                'D' => Tile.D,
+                _ => throw new UnreachableException()
+            };
+            i++;
+        }
+
+        state[i++] = Tile.D;
+        state[i++] = Tile.C;
+        state[i++] = Tile.B;
+        state[i++] = Tile.A;
+        state[i++] = Tile.D;
+        state[i++] = Tile.B;
+        state[i++] = Tile.A;
+        state[i++] = Tile.C;
+
+        line = inputText[3];
+        foreach (var c in line.Where(c => c is 'A' or 'B' or 'C' or 'D'))
+        {
+            state[i] = c switch
+            {
+                'A' => Tile.A,
+                'B' => Tile.B,
+                'C' => Tile.C,
+                'D' => Tile.D,
+                _ => throw new UnreachableException()
+            };
+            i++;
         }
 
         return state;
